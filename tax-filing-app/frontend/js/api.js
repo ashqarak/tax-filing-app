@@ -3,7 +3,7 @@
  * Handles all communication with the Spring Boot backend at localhost:8080
  */
 
-const API_BASE = 'https://taxease-api.onrender.com/api';
+const API_BASE = 'https://tax-filing-app-90n4.onrender.com';
 const AY = '2025-26'; // Current Assessment Year
 
 // ── Token helpers ──────────────────────────────────────────────
