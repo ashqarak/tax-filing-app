@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Filing History · TaxEase India</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body class="app-layout">
+
+  <aside class="sidebar" id="app-sidebar"></aside>
+
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Filing History</h1>
+      <p>Your past income tax returns.</p>
+    </header>
+
+    <div class="page-body" id="loading-container">
+      <div class="loading-overlay">
+        <div class="spinner spinner-lg"></div>
+        <p>Fetching your records...</p>
+      </div>
+    </div>
+
+    <div class="page-body hidden" id="history-container">
+      <div class="card">
+        <div class="table-wrapper">
+          <table id="history-table">
+            <thead>
+              <tr>
+                <th>Assessment Year</th>
+                <th>Filing Date</th>
+                <th>Regime</th>
+                <th>Taxable Income</th>
+                <th>Tax Settled</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/app-shell.js"></script>
+  <script>
+    async function loadData() {
+      if (!await initAppShell('history')) return;
+
+      try {
+        const returns = await TaxAPI.getAllReturns();
+        const tbody = document.querySelector('#history-table tbody');
+        
+        document.getElementById('loading-container').classList.add('hidden');
+        document.getElementById('history-container').classList.remove('hidden');
+
+        if (returns.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:3rem;"><div class="empty-state"><div class="empty-state-icon">📭</div><h3>No Returns Filed</h3><p>You haven't filed any returns through TaxEase yet.</p></div></td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = returns.map(rt => {
+           let badgeClass = rt.status === 'SUBMITTED' ? 'badge-blue' : rt.status === 'VERIFIED' ? 'badge-green' : 'badge-orange';
+           
+           return `
+            <tr>
+              <td><span style="font-weight:600; color:var(--text-primary)">${rt.assessmentYear}</span></td>
+              <td>${formatDate(rt.filingDate)}</td>
+              <td><span class="badge ${rt.regimeOpted === 'OLD' ? 'badge-orange' : 'badge-blue'}">${rt.regimeOpted}</span></td>
+              <td>${formatINR(rt.netTaxableIncome)}</td>
+              <td>${formatINR(rt.netTaxPayable)}</td>
+              <td><span class="badge ${badgeClass}">${rt.status}</span></td>
+            </tr>
+          `;
+        }).join('');
+
+      } catch (err) {
+        showToast('Error loading history', 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>

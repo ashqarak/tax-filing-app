@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Income Details · TaxEase India</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body class="app-layout">
+
+  <aside class="sidebar" id="app-sidebar"></aside>
+
+  <main class="main-content">
+    <header class="page-header flex-between">
+      <div>
+        <h1>Income Details</h1>
+        <p>Enter your earnings for AY 2025-26</p>
+      </div>
+      <button class="btn btn-primary" id="save-btn-top" onclick="saveIncome()">💾 Save Income</button>
+    </header>
+
+    <div class="page-body" id="loading-container">
+      <div class="loading-overlay">
+        <div class="spinner spinner-lg"></div>
+        <p>Loading your profile...</p>
+      </div>
+    </div>
+
+    <div class="page-body hidden" id="form-container">
+      <div id="alert-container"></div>
+      
+      <form id="income-form">
+        
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">👨‍💼 Salary Income</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Basic Salary</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="basicSalary" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">HRA Received</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="hraReceived" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">LTA Received</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="ltaReceived" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Special Allowance</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="specialAllowance" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bonus</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="bonus" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Other Allowances</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="otherAllowances" value="0" min="0">
+                </div>
+              </div>
+            </div>
+            
+            <h4 class="form-section-title">HRA Exemption Details</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">City Type</label>
+                <select class="form-select" id="cityType">
+                  <option value="METRO">Metro (50% basic)</option>
+                  <option value="NON_METRO">Non-Metro (40% basic)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Actual Rent Paid (Monthly)</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="rentPaidMonthly" value="0" min="0">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">🏠 House Property</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Annual Rental Income (if let out)</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="annualRentalIncome" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Municipal Taxes Paid</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="municipalTaxPaid" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Home Loan Interest Paid</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="homeLoanInterestSelfOccupied" value="0" min="0">
+                </div>
+                <div class="form-hint">Max ₹2,00,000 deduction allowed for self-occupied property.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">📈 Capital Gains (Stocks/MFs)</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Short Term Capital Gains (Slab rate)</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="shortTermCapitalGains" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">STCG u/s 111A (Shares - 15%)</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="stcgSpecialRate" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Long Term Capital Gains (Shares)</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="longTermCapitalGains" value="0" min="0">
+                </div>
+                <div class="form-hint">Gains above ₹1.25 Lakh taxed at 12.5%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">💸 Other Sources</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Savings Bank Interest</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="interestFromSavings" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Fixed Deposit Interest</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="interestFromFD" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Dividend Income</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="dividendIncome" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Any Other Income</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="otherIncome" value="0" min="0">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">🧾 Taxes Already Paid</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">TDS on Salary</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="tdsSalary" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Other TDS</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="tdsOther" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Advance Tax Paid</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="advanceTaxPaid" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Self Assessment Tax Paid</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="selfAssessmentTax" value="0" min="0">
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-3 flex" style="justify-content: flex-end; gap: 1rem;">
+               <button type="button" class="btn btn-primary btn-lg" id="save-btn-bottom" onclick="saveIncome()">Save Income Details</button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/app-shell.js"></script>
+  <script>
+    const fields = [
+      'basicSalary', 'hraReceived', 'ltaReceived', 'specialAllowance', 'otherAllowances', 'bonus',
+      'cityType', 'rentPaidMonthly',
+      'annualRentalIncome', 'municipalTaxPaid', 'homeLoanInterestSelfOccupied',
+      'shortTermCapitalGains', 'stcgSpecialRate', 'longTermCapitalGains',
+      'interestFromSavings', 'interestFromFD', 'dividendIncome', 'otherIncome',
+      'tdsSalary', 'tdsOther', 'advanceTaxPaid', 'selfAssessmentTax'
+    ];
+
+    async function loadData() {
+      if (!await initAppShell('income')) return;
+
+      try {
+        const income = await IncomeAPI.get();
+        // Populate form
+        fields.forEach(f => {
+          const el = document.getElementById(f);
+          if (el) el.value = income[f] || (el.tagName === 'SELECT' ? 'METRO' : 0);
+        });
+
+        document.getElementById('loading-container').classList.add('hidden');
+        document.getElementById('form-container').classList.remove('hidden');
+      } catch (err) {
+        showToast('Error loading income details', 'error');
+      }
+    }
+
+    async function saveIncome() {
+      const payload = {};
+      fields.forEach(f => {
+        const val = document.getElementById(f).value;
+        payload[f] = f === 'cityType' ? val : (Number(val) || 0);
+      });
+
+      const btn1 = document.getElementById('save-btn-top');
+      const btn2 = document.getElementById('save-btn-bottom');
+      setLoading(btn1, true, '');
+      setLoading(btn2, true, 'Saving...');
+
+      try {
+        await IncomeAPI.save(payload);
+        showToast('Income details saved successfully!', 'success');
+        setTimeout(() => window.location.href = 'deductions.html', 1000);
+      } catch (err) {
+        document.getElementById('alert-container').innerHTML = `
+          <div class="alert alert-error">
+             <span class="alert-icon">❌</span>
+             <span>Failed to save: ${err.message}</span>
+          </div>`;
+        window.scrollTo(0,0);
+      } finally {
+        setLoading(btn1, false);
+        setLoading(btn2, false);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>

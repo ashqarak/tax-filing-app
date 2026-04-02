@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login · TaxEase India</title>
+  <meta name="description" content="Sign in or create your free TaxEase India account to start filing your Income Tax Return for AY 2025-26."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body class="auth-page">
+
+  <div class="auth-card">
+    <!-- Logo -->
+    <div class="auth-logo" onclick="window.location.href='index.html'">
+      <span class="brand-icon">🇮🇳</span>
+      <span class="brand-name">TaxEase<span class="brand-accent">India</span></span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-tabs" role="tablist">
+      <button class="auth-tab active" id="tab-login" role="tab" aria-selected="true" onclick="switchTab('login')">Sign In</button>
+      <button class="auth-tab" id="tab-register" role="tab" aria-selected="false" onclick="switchTab('register')">Create Account</button>
+    </div>
+
+    <!-- Login Form -->
+    <form class="auth-form active" id="login-form" novalidate>
+      <div id="login-alert"></div>
+
+      <div class="form-group">
+        <label class="form-label" for="login-email">Email Address</label>
+        <input class="form-input" type="email" id="login-email" placeholder="you@example.com" autocomplete="email" required/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="login-password">Password</label>
+        <input class="form-input" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required/>
+      </div>
+
+      <button class="btn btn-primary w-full mt-2" type="submit" id="login-btn" style="justify-content:center;">
+        Sign In →
+      </button>
+
+      <p class="text-muted mt-2" style="text-align:center; font-size:0.85rem;">
+        Don't have an account? <a href="#" onclick="switchTab('register')">Create one free</a>
+      </p>
+    </form>
+
+    <!-- Register Form -->
+    <form class="auth-form" id="register-form" novalidate>
+      <div id="register-alert"></div>
+
+      <div class="form-group">
+        <label class="form-label" for="reg-name">Full Name</label>
+        <input class="form-input" type="text" id="reg-name" placeholder="Rahul Sharma" autocomplete="name" required/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="reg-email">Email Address</label>
+        <input class="form-input" type="email" id="reg-email" placeholder="you@example.com" autocomplete="email" required/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="reg-password">Password</label>
+        <input class="form-input" type="password" id="reg-password" placeholder="Min 8 characters" autocomplete="new-password" required minlength="8"/>
+        <div class="form-hint">At least 8 characters</div>
+      </div>
+
+      <button class="btn btn-primary w-full mt-2" type="submit" id="register-btn" style="justify-content:center;">
+        Create Free Account →
+      </button>
+
+      <p class="text-muted mt-2" style="text-align:center; font-size:0.85rem;">
+        Already have an account? <a href="#" onclick="switchTab('login')">Sign in</a>
+      </p>
+    </form>
+
+    <div class="divider">Secure · Encrypted · Private</div>
+    <p class="text-muted" style="text-align:center; font-size:0.78rem;">
+      🔒 Your data is protected with JWT authentication and 256-bit encryption
+    </p>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // If already logged in, go to dashboard
+    if (Auth.isLoggedIn()) {
+      window.location.href = 'dashboard.html';
+    }
+
+    // Switch between login/register tabs
+    function switchTab(tab) {
+      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+      document.getElementById('login-form').classList.toggle('active', tab === 'login');
+      document.getElementById('register-form').classList.toggle('active', tab === 'register');
+    }
+
+    // Check for #register in URL
+    if (window.location.hash === '#register') switchTab('register');
+
+    function showAlert(containerId, message, type = 'error') {
+      const el = document.getElementById(containerId);
+      const icons = { error: '⚠️', success: '✅', info: 'ℹ️' };
+      el.innerHTML = `
+        <div class="alert alert-${type === 'error' ? 'error' : type === 'success' ? 'success' : 'info'}">
+          <span class="alert-icon">${icons[type] || '⚠️'}</span>
+          <span>${message}</span>
+        </div>`;
+    }
+
+    // ── Login ──────────────────────────────────────────────────
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      if (!email || !password) {
+        showAlert('login-alert', 'Please fill in all fields.');
+        return;
+      }
+
+      setLoading(btn, true, 'Signing in…');
+      try {
+        const data = await AuthAPI.login({ email, password });
+        // Fetch user info
+        const user = await ClientAPI.getMe();
+        Auth.setUser(user);
+        showToast(`Welcome back, ${user.name}! 🎉`, 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 800);
+      } catch (err) {
+        showAlert('login-alert', err.message || 'Invalid credentials. Please try again.');
+        setLoading(btn, false);
+      }
+    });
+
+    // ── Register ───────────────────────────────────────────────
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('register-btn');
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+
+      if (!name || !email || !password) {
+        showAlert('register-alert', 'Please fill in all fields.');
+        return;
+      }
+      if (password.length < 8) {
+        showAlert('register-alert', 'Password must be at least 8 characters.');
+        return;
+      }
+
+      setLoading(btn, true, 'Creating account…');
+      try {
+        await AuthAPI.register({ name, email, password });
+        const user = await ClientAPI.getMe();
+        Auth.setUser(user);
+        showToast(`Account created! Welcome, ${user.name} 🎊`, 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 800);
+      } catch (err) {
+        showAlert('register-alert', err.message || 'Registration failed. Try again.');
+        setLoading(btn, false);
+      }
+    });
+  </script>
+</body>
+</html>

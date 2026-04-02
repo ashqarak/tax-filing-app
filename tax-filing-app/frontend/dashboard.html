@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard · TaxEase India</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body class="app-layout">
+
+  <!-- Sidebar injected here -->
+  <aside class="sidebar" id="app-sidebar"></aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Welcome back! 👋</h1>
+      <p>Assessment Year 2025-26 Overview</p>
+    </header>
+
+    <div class="page-body">
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-label">Gross Income</div>
+          <div class="stat-card-value blue" id="dashboard-income">₹0</div>
+          <div class="stat-card-sub">Total entered income</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Total Deductions (Old)</div>
+          <div class="stat-card-value orange" id="dashboard-deductions">₹0</div>
+          <div class="stat-card-sub">Claimable under old regime</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Est. Tax Payable</div>
+          <div class="stat-card-value red" id="dashboard-tax">₹0</div>
+          <div class="stat-card-sub">Based on recommended regime</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Filing Progress</span>
+          </div>
+          <div class="card-body">
+            <div class="stepper">
+              <div class="stepper-item">
+                <div class="stepper-item-inner">
+                  <div class="stepper-circle done">1</div>
+                  <div class="stepper-label done">Profile</div>
+                </div>
+                <div class="stepper-line done"></div>
+              </div>
+              <div class="stepper-item">
+                <div class="stepper-item-inner">
+                  <div class="stepper-circle" id="step-income">2</div>
+                  <div class="stepper-label">Income</div>
+                </div>
+                <div class="stepper-line"></div>
+              </div>
+              <div class="stepper-item">
+                <div class="stepper-item-inner">
+                  <div class="stepper-circle" id="step-deductions">3</div>
+                  <div class="stepper-label">Deductions</div>
+                </div>
+                <div class="stepper-line"></div>
+              </div>
+              <div class="stepper-item" style="flex:0;">
+                <div class="stepper-item-inner">
+                  <div class="stepper-circle" id="step-file">4</div>
+                  <div class="stepper-label">File</div>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-muted mb-2" style="font-size:0.9rem;" id="progress-text">
+              Complete your income and deduction details to view your tax computation.
+            </p>
+            <a href="income.html" class="btn btn-primary">Continue Filing →</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Quick Actions</span>
+          </div>
+          <div class="card-body" style="display:flex; flex-direction:column; gap:0.75rem;">
+            <a href="income.html" class="btn btn-ghost" style="justify-content:flex-start;">
+              <span class="nav-icon">💰</span> Update Salary & Income
+            </a>
+            <a href="deductions.html" class="btn btn-ghost" style="justify-content:flex-start;">
+              <span class="nav-icon">🧾</span> Add 80C & Health Insurance
+            </a>
+            <a href="tax-result.html" class="btn btn-ghost" style="justify-content:flex-start;">
+              <span class="nav-icon">🧮</span> Compare Old vs New Regime
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/app-shell.js"></script>
+  <script>
+    async function loadDashboard() {
+      if (!await initAppShell('dashboard')) return;
+
+      try {
+        const taxSummary = await TaxAPI.calculate();
+        
+        document.getElementById('dashboard-income').textContent = formatINR(taxSummary.grossTotalIncome);
+        document.getElementById('dashboard-deductions').textContent = formatINR(taxSummary.totalDeductionsOld);
+        
+        const payable = taxSummary.recommendedRegime === 'OLD' ? taxSummary.netTaxPayableOld : taxSummary.netTaxPayableNew;
+        document.getElementById('dashboard-tax').textContent = formatINR(payable);
+        
+        if (payable === 0) {
+           document.getElementById('dashboard-tax').classList.replace('red', 'green');
+        }
+
+        // Update stepper based on data purely as an indicator
+        if (taxSummary.grossTotalIncome > 0) {
+            document.getElementById('step-income').classList.add('done');
+            document.getElementById('step-income').nextElementSibling.classList.add('done'); // label
+            document.getElementById('step-income').parentElement.nextElementSibling.classList.add('done'); // line
+            document.getElementById('progress-text').textContent = "Income details recorded. Review your tax calculation to file!";
+            
+            if(taxSummary.totalDeductionsOld > 0 || String(taxSummary.recommendedRegime).length > 0) {
+                document.getElementById('step-deductions').classList.add('done');
+                document.getElementById('step-deductions').nextElementSibling.classList.add('done');
+                document.getElementById('step-deductions').parentElement.nextElementSibling.classList.add('done');
+            }
+        }
+
+      } catch (e) {
+        console.error("No tax data calculated yet or error loading.", e);
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+  </script>
+</body>
+</html>

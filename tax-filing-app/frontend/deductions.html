@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Deductions · TaxEase India</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body class="app-layout">
+
+  <aside class="sidebar" id="app-sidebar"></aside>
+
+  <main class="main-content">
+    <header class="page-header flex-between">
+      <div>
+        <h1>Deductions</h1>
+        <p>Save tax under Old Regime (Chapter VI-A)</p>
+      </div>
+      <button class="btn btn-primary" id="save-btn-top" onclick="saveDeductions()">💾 Save Deductions</button>
+    </header>
+
+    <div class="page-body" id="loading-container">
+      <div class="loading-overlay">
+        <div class="spinner spinner-lg"></div>
+        <p>Loading your deductions...</p>
+      </div>
+    </div>
+
+    <div class="page-body hidden" id="form-container">
+      <div id="alert-container"></div>
+      
+      <div class="alert alert-info">
+        <span class="alert-icon">ℹ️</span>
+        <div>These deductions are mostly applicable to the <strong>Old Tax Regime</strong>. Under the New Regime, only Standard Deduction and 80CCD(2) are allowed. We'll automatically calculate both to recommend the best option.</div>
+      </div>
+
+      <form id="deduction-form">
+        
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">🛡️ Section 80C (Max Limit: ₹1,50,000)</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Employee Provident Fund (EPF)</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="sec80C_epf" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Public Provident Fund (PPF)</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="sec80C_ppf" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Life Insurance Premium (LIC)</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="sec80C_lic" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">ELSS / Tax Saving Mutual Funds</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="sec80C_elss" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Home Loan Principal Repayment</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="sec80C_homeLoanPrincipal" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Children's Tuition Fees</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="sec80C_tuitionFees" value="0" min="0">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">🏥 Section 80D - Health Insurance</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Premium for Self & Family</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="sec80D_selfFamily" value="0" min="0">
+                </div>
+                <div class="form-hint">Max ₹25,000</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Premium for Parents</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="sec80D_parents" value="0" min="0">
+                </div>
+                <div class="form-hint">Max ₹25,000 (or ₹50,000 if parent is a Senior Citizen)</div>
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                 <label class="checkbox-group">
+                   <input type="checkbox" id="parentsSeniorCitizen">
+                   <span>Are your parents Senior Citizens (60 years or above)?</span>
+                 </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">🌟 Other Deductions</span></div>
+          <div class="card-body">
+             <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">NPS Under 80CCD(1B)</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="sec80CCD1B_nps" value="0" min="0">
+                </div>
+                <div class="form-hint">Extra ₹50,000 deduction over and above 80C</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Donations (Section 80G - 100% deduction)</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="sec80G_100percent" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Donations (Section 80G - 50% deduction)</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="sec80G_50percent" value="0" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Education Loan Interest (Section 80E)</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="sec80E_educationLoan" value="0" min="0">
+                </div>
+                <div class="form-hint">No upper limit on interest paid</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Professional Tax</label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">₹</span>
+                  <input type="number" class="form-input" id="professionalTax" value="0" min="0">
+                </div>
+                <div class="form-hint">Deducted from salary by employer</div>
+              </div>
+            </div>
+            
+            <div class="mt-3 flex" style="justify-content: flex-end; gap: 1rem;">
+               <button type="button" class="btn btn-primary btn-lg" id="save-btn-bottom" onclick="saveDeductions()">Save & Calculate Tax →</button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/app-shell.js"></script>
+  <script>
+    const fields = [
+      'sec80C_ppf', 'sec80C_elss', 'sec80C_lic', 'sec80C_epf', 'sec80C_nsc', 
+      'sec80C_tuitionFees', 'sec80C_homeLoanPrincipal', 'sec80C_sukanyaSamridhi', 'sec80C_others',
+      'sec80D_selfFamily', 'sec80D_parents', 'parentsSeniorCitizen',
+      'sec80CCD1B_nps', 'sec80G_100percent', 'sec80G_50percent', 
+      'sec80TTA_savingsInterest', 'sec80TTB_fdInterest', 'sec80E_educationLoan',
+      'sec80EEA_homeLoan', 'professionalTax'
+    ];
+
+    async function loadData() {
+      if (!await initAppShell('deductions')) return;
+
+      try {
+        const deductions = await DeductionAPI.get();
+        // Populate form
+        fields.forEach(f => {
+          const el = document.getElementById(f);
+          if (el) {
+             if (el.type === 'checkbox') {
+                 el.checked = deductions[f] || false;
+             } else {
+                 el.value = deductions[f] || 0;
+             }
+          }
+        });
+
+        document.getElementById('loading-container').classList.add('hidden');
+        document.getElementById('form-container').classList.remove('hidden');
+      } catch (err) {
+        showToast('Error loading deductions', 'error');
+      }
+    }
+
+    async function saveDeductions() {
+      const payload = {};
+      fields.forEach(f => {
+        const el = document.getElementById(f);
+        if (el) {
+             payload[f] = el.type === 'checkbox' ? el.checked : (Number(el.value) || 0);
+        }
+      });
+
+      const btn1 = document.getElementById('save-btn-top');
+      const btn2 = document.getElementById('save-btn-bottom');
+      setLoading(btn1, true, '');
+      setLoading(btn2, true, 'Saving...');
+
+      try {
+        await DeductionAPI.save(payload);
+        showToast('Deductions saved successfully!', 'success');
+        setTimeout(() => window.location.href = 'tax-result.html', 1000);
+      } catch (err) {
+        document.getElementById('alert-container').innerHTML = `
+          <div class="alert alert-error">
+             <span class="alert-icon">❌</span>
+             <span>Failed to save: ${err.message}</span>
+          </div>`;
+        window.scrollTo(0,0);
+      } finally {
+        setLoading(btn1, false);
+        setLoading(btn2, false);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>

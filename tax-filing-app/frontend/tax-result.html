@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tax Calculator · TaxEase India</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body class="app-layout">
+
+  <aside class="sidebar" id="app-sidebar"></aside>
+
+  <main class="main-content">
+    <header class="page-header">
+      <h1>Tax Computation</h1>
+      <p>Compare regimes and find the best way to save.</p>
+    </header>
+
+    <div class="page-body" id="loading-container">
+      <div class="loading-overlay">
+        <div class="spinner spinner-lg"></div>
+        <p>Crunching the numbers...</p>
+      </div>
+    </div>
+
+    <div class="page-body hidden" id="result-container">
+      
+      <div class="alert alert-success" id="recommendation-alert">
+         <span class="alert-icon">✨</span>
+         <div>We recommend the <strong id="rec-regime">New Regime</strong>. You will save <strong id="rec-savings">₹0</strong> compared to the other regime!</div>
+      </div>
+
+      <div class="regime-grid">
+        <!-- New Regime Card -->
+        <div class="regime-card new-regime" id="card-new">
+          <h3>New Tax Regime</h3>
+          <p class="text-muted" style="font-size:0.85rem">Lower slab rates, fewer deductions.</p>
+          <div class="regime-tax" id="tax-new">₹0</div>
+          <p class="mb-2" style="font-size:0.85rem; font-weight:600">Total Tax Payable</p>
+          
+          <ul class="regime-details">
+            <li><span>Gross Income</span><span id="gross-new">₹0</span></li>
+            <li><span>Standard Deduction</span><span id="std-new">₹0</span></li>
+            <li><span>Other Exemptions</span><span id="exempt-new">₹0</span></li>
+            <li><span>Taxable Income</span><span id="taxable-new">₹0</span></li>
+            <li><span>Base Tax</span><span id="base-new">₹0</span></li>
+            <li><span>Rebate 87A</span><span id="rebate-new">₹0</span></li>
+            <li><span>Cess & Surcharge</span><span id="cess-new">₹0</span></li>
+          </ul>
+        </div>
+        
+        <!-- Old Regime Card -->
+        <div class="regime-card old-regime" id="card-old">
+          <h3>Old Tax Regime</h3>
+          <p class="text-muted" style="font-size:0.85rem">Higher slab rates, all deductions.</p>
+          <div class="regime-tax" id="tax-old">₹0</div>
+          <p class="mb-2" style="font-size:0.85rem; font-weight:600">Total Tax Payable</p>
+          
+          <ul class="regime-details">
+            <li><span>Gross Income</span><span id="gross-old">₹0</span></li>
+            <li><span>HRA Exemption</span><span id="hra-old">₹0</span></li>
+            <li><span>Total Deductions</span><span id="deductions-old">₹0</span></li>
+            <li><span>Taxable Income</span><span id="taxable-old">₹0</span></li>
+            <li><span>Base Tax</span><span id="base-old">₹0</span></li>
+            <li><span>Rebate 87A</span><span id="rebate-old">₹0</span></li>
+            <li><span>Cess & Surcharge</span><span id="cess-old">₹0</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header"><span class="card-title">🧾 Deduction Breakdown (Old Regime)</span></div>
+        <div class="card-body">
+           <div class="deduction-row">
+              <span class="deduction-label">Section 80C (PPF, LIC, ELSS)</span>
+              <span class="deduction-value" id="breakdown-80c">₹0</span>
+           </div>
+           <div class="deduction-row">
+              <span class="deduction-label">Section 80D (Health Insurance)</span>
+              <span class="deduction-value" id="breakdown-80d">₹0</span>
+           </div>
+           <div class="deduction-row">
+              <span class="deduction-label">Section 80CCD(1B) (NPS)</span>
+              <span class="deduction-value" id="breakdown-nps">₹0</span>
+           </div>
+           <div class="deduction-row">
+              <span class="deduction-label">Section 80G (Donations)</span>
+              <span class="deduction-value" id="breakdown-80g">₹0</span>
+           </div>
+            <div class="deduction-row">
+              <span class="deduction-label">Standard Deduction & Professional Tax</span>
+              <span class="deduction-value" id="breakdown-std">₹0</span>
+           </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header"><span class="card-title">✅ Final Tax Settlement</span></div>
+        <div class="card-body">
+           <div class="grid-2">
+               <div>
+                   <p class="text-muted mb-1" style="font-size: 0.85rem;">Total Taxes Already Paid</p>
+                   <h3 style="font-size: 1.5rem" id="taxes-paid">₹0</h3>
+               </div>
+               <div>
+                   <p class="text-muted mb-1" style="font-size: 0.85rem;">Remaining Payable / (Refund)</p>
+                   <h3 style="font-size: 1.5rem" id="taxes-due">₹0</h3>
+               </div>
+           </div>
+           <hr style="border:0; border-top:1px solid var(--border); margin: 1.5rem 0;">
+           <button class="btn btn-success btn-lg w-full" style="justify-content:center" id="file-return-btn" onclick="submitReturn()">
+              File Return Now 🚀
+           </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/app-shell.js"></script>
+  <script>
+    let currentRegime = 'NEW';
+    let globalSummary = null;
+    
+    async function loadData() {
+      if (!await initAppShell('tax-result')) return;
+
+      try {
+        const summary = await TaxAPI.calculate();
+        globalSummary = summary;
+        
+        document.getElementById('loading-container').classList.add('hidden');
+        document.getElementById('result-container').classList.remove('hidden');
+        
+        // Recommendation
+        currentRegime = summary.recommendedRegime;
+        document.getElementById('rec-regime').textContent = summary.recommendedRegime === 'OLD' ? 'Old Regime' : 'New Regime';
+        document.getElementById('rec-savings').textContent = formatINR(summary.taxSavings);
+        
+        // Highlight recommended card
+        if (summary.recommendedRegime === 'OLD') {
+            document.getElementById('card-old').classList.add('recommended');
+            const badge = document.createElement('div');
+            badge.className = 'regime-badge';
+            badge.textContent = 'RECOMMENDED';
+            document.getElementById('card-old').appendChild(badge);
+        } else {
+            document.getElementById('card-new').classList.add('recommended');
+             const badge = document.createElement('div');
+            badge.className = 'regime-badge';
+            badge.textContent = 'RECOMMENDED';
+            document.getElementById('card-new').appendChild(badge);
+        }
+
+        // New
+        document.getElementById('tax-new').textContent = formatINR(summary.netTaxPayableNew);
+        document.getElementById('gross-new').textContent = formatINR(summary.grossTotalIncome);
+        document.getElementById('std-new').textContent = formatINR(summary.standardDeduction);
+        document.getElementById('exempt-new').textContent = formatINR(summary.sec80CCD1B); // Only NPS employer
+        document.getElementById('taxable-new').textContent = formatINR(summary.taxableIncomeNew);
+        document.getElementById('base-new').textContent = formatINR(summary.baseTaxNew);
+        document.getElementById('rebate-new').textContent = formatINR(summary.rebate87ANew);
+        document.getElementById('cess-new').textContent = formatINR(summary.surchargeNew + summary.cessNew);
+
+        // Old
+        document.getElementById('tax-old').textContent = formatINR(summary.netTaxPayableOld);
+        document.getElementById('gross-old').textContent = formatINR(summary.grossTotalIncome);
+        document.getElementById('hra-old').textContent = formatINR(summary.hraExemption);
+        document.getElementById('deductions-old').textContent = formatINR(summary.totalDeductionsOld);
+        document.getElementById('taxable-old').textContent = formatINR(summary.taxableIncomeOld);
+        document.getElementById('base-old').textContent = formatINR(summary.baseTaxOld);
+        document.getElementById('rebate-old').textContent = formatINR(summary.rebate87AOld);
+        document.getElementById('cess-old').textContent = formatINR(summary.surchargeOld + summary.cessOld);
+        
+        // Breakdowns
+        document.getElementById('breakdown-80c').textContent = formatINR(summary.sec80C_total);
+        document.getElementById('breakdown-80d').textContent = formatINR(summary.sec80D_total);
+        document.getElementById('breakdown-nps').textContent = formatINR(summary.sec80CCD1B);
+        document.getElementById('breakdown-80g').textContent = formatINR(summary.sec80G_total);
+        document.getElementById('breakdown-std').textContent = formatINR(summary.standardDeduction + summary.professionalTax);
+        
+        // Final Settlement
+        const paid = summary.tdsCredits + summary.advanceTaxCredits;
+        document.getElementById('taxes-paid').textContent = formatINR(paid);
+        
+        const refund = summary.recommendedRegime === 'OLD' ? summary.refundOld : summary.refundNew;
+        const due = summary.recommendedRegime === 'OLD' ? summary.netTaxPayableOld : summary.netTaxPayableNew;
+        
+        if (refund > 0) {
+           document.getElementById('taxes-due').textContent = formatINR(refund) + ' (Refund)';
+           document.getElementById('taxes-due').style.color = 'var(--accent-green)';
+        } else {
+            const rem = Math.max(0, due - paid);
+            document.getElementById('taxes-due').textContent = formatINR(rem);
+            if(rem > 0) document.getElementById('taxes-due').style.color = 'var(--accent-red)';
+        }
+
+      } catch (err) {
+        showToast('Error calculating tax', 'error');
+      }
+    }
+
+    async function submitReturn() {
+        const btn = document.getElementById('file-return-btn');
+        setLoading(btn, true, 'Submitting to IT Dept...');
+        
+        try {
+            await TaxAPI.submit();
+            showToast('Income Tax Return Submitted Successfully! 🎉', 'success');
+            setTimeout(() => window.location.href = 'history.html', 1500);
+        } catch (err) {
+            showToast(err.message, 'error');
+            setLoading(btn, false);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>
